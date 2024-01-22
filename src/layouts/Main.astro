@@ -1,6 +1,5 @@
 ---
 import Breadcrumbs from "@components/Breadcrumbs.astro";
-import { Umami } from 'astro-analytics';
 
 interface StringTitleProp {
   pageTitle: string;
@@ -34,7 +33,6 @@ const { props } = Astro;
   }
   <p>{props.pageDesc}</p>
   <slot />
-  <Umami id="1c24b7bf-dab3-4441-959c-fb6448697191" src="https://eu.umami.is/script.js" />
 </main>
 
 <style>

@@ -4,6 +4,7 @@ import { slugifyStr } from "./slugify";
 
 export const getReadingTime = async () => {
   // Get all posts using glob. This is to get the updated frontmatter
+  // @ts-ignore
   const globPosts = import.meta.glob("../content/blog/*.md") as Promise<CollectionEntry<"blog">["data"][]>;
 
   // Then, set those frontmatter value in a JS Map with key value pair

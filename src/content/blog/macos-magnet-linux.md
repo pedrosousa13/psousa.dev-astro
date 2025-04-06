@@ -1,7 +1,7 @@
 ---
 author: Pedro Sousa
-pubDatetime: 2024-03-19T10:00:00Z
-modDatetime: 2024-03-19T10:00:00Z
+pubDatetime: 2025-04-06T10:00:00Z
+modDatetime: 2025-04-06T10:00:00Z
 title: Recreating macOS Magnet window management in Linux
 slug: macos-magnet-linux
 featured: true

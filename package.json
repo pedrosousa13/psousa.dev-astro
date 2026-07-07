@@ -6,6 +6,7 @@
     "start": "astro dev",
     "build": "astro check && astro build && jampack ./dist",
     "preview": "astro preview",
+    "test:series-links": "node scripts/check-content-store-series.mjs",
     "sync": "astro sync",
     "astro": "astro",
     "format:check": "prettier --check .",

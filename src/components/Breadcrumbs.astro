@@ -27,25 +27,19 @@ breadcrumbList[0] === "tags" &&
 <nav class="breadcrumb" aria-label="breadcrumb">
   <ul>
     <li>
-      <a href="/">Home</a>
-      <span aria-hidden="true">&raquo;</span>
+      <a href="/">~</a>
+      <span aria-hidden="true"> / </span>
     </li>
     {
       breadcrumbList.map((breadcrumb, index) =>
         index + 1 === breadcrumbList.length ? (
           <li>
-            <span
-              class={`${index > 0 ? "lowercase" : "capitalize"}`}
-              aria-current="page"
-            >
-              {/* make the last part lowercase in Home > Tags > some-tag */}
-              {decodeURIComponent(breadcrumb)}
-            </span>
+            <span aria-current="page">{decodeURIComponent(breadcrumb)}</span>
           </li>
         ) : (
           <li>
             <a href={`/${breadcrumb}`}>{breadcrumb}</a>
-            <span aria-hidden="true">&raquo;</span>
+            <span aria-hidden="true"> / </span>
           </li>
         )
       )
@@ -54,19 +48,18 @@ breadcrumbList[0] === "tags" &&
 </nav>
 
 <style>
+  @reference "../styles/base.css";
+
   .breadcrumb {
-    @apply mx-auto mb-1 mt-8 w-full max-w-3xl px-4;
+    @apply text-skin-dim mx-auto mt-8 mb-1 w-full max-w-3xl px-4 text-sm;
   }
   .breadcrumb ul li {
     @apply inline;
   }
   .breadcrumb ul li a {
-    @apply capitalize opacity-70;
+    @apply hover:text-skin-accent transition-colors duration-[120ms];
   }
-  .breadcrumb ul li span {
-    @apply opacity-70;
-  }
-  .breadcrumb ul li:not(:last-child) a {
-    @apply hover:opacity-100;
+  .breadcrumb ul li span[aria-current="page"] {
+    @apply text-skin-base;
   }
 </style>

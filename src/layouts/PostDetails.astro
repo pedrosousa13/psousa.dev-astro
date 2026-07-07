@@ -5,9 +5,10 @@ import Footer from "@components/Footer.astro";
 import Tag from "@components/Tag.astro";
 import Datetime from "@components/Datetime";
 import Comments from "@components/Comments";
-import type { CollectionEntry } from "astro:content";
+import { render, type CollectionEntry } from "astro:content";
 import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
+import { SITE } from "@config";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -27,7 +28,42 @@ const {
   tags,
 } = post.data;
 
-const { Content } = await post.render();
+const { Content } = await render(post);
+
+const contentStoreSeries = [
+  {
+    part: 1,
+    slug: "content-store-part-1",
+    title: "Stop fetching what you already have",
+    pubDatetime: "2026-07-06T09:00:00Z",
+  },
+  {
+    part: 2,
+    slug: "content-store-part-2",
+    title: "Keeping a copy you can trust",
+    pubDatetime: "2026-07-13T09:00:00Z",
+  },
+  {
+    part: 3,
+    slug: "content-store-part-3",
+    title: "The read side",
+    pubDatetime: "2026-07-20T09:00:00Z",
+  },
+  {
+    part: 4,
+    slug: "content-store-part-4",
+    title: "The fun stuff",
+    pubDatetime: "2026-07-27T09:00:00Z",
+  },
+];
+
+const currentSeriesPart = contentStoreSeries.find(
+  item => item.slug === post.id
+);
+const isContentStorePost = Boolean(currentSeriesPart);
+const isSeriesPartPublished = (pubDatetime: string) =>
+  import.meta.env.DEV ||
+  Date.now() > new Date(pubDatetime).getTime() - SITE.scheduledPostMargin;
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
@@ -52,30 +88,57 @@ const layoutProps = {
   <Header />
   <div class="mx-auto flex w-full max-w-3xl justify-start px-2">
     <button
-      class="focus-outline mb-2 mt-8 flex hover:opacity-75"
+      class="nav-text-button focus-outline mt-8 mb-2"
       onclick="history.back()"
     >
-      <svg xmlns="http://www.w3.org/2000/svg"
-        ><path
-          d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
-        ></path>
-      </svg><span>Go back</span>
+      &lt;- back
     </button>
   </div>
   <main id="main-content">
     <h1 transition:name={slugifyStr(title)} class="post-title">{title}</h1>
-    <Datetime
-      pubDatetime={pubDatetime}
-      modDatetime={modDatetime}
-      size="lg"
-      className="my-2"
-    />
-    <span>{readingTime}</span>
-    <article id="article" role="article" class="prose mx-auto mt-8 max-w-3xl">
+    <p class="post-meta">
+      -- <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} /> · {
+        readingTime
+      }
+    </p>
+    {
+      isContentStorePost && currentSeriesPart && (
+        <aside class="series-rail" aria-label="The content store series">
+          <p class="series-kicker">
+            The content store · part {currentSeriesPart.part} of{" "}
+            {contentStoreSeries.length}
+          </p>
+          <ol class="series-list">
+            {contentStoreSeries.map(item => {
+              const published = isSeriesPartPublished(item.pubDatetime);
+              const isCurrent = item.slug === post.id;
+
+              return (
+                <li class={isCurrent ? "current" : ""}>
+                  <span class="series-index">
+                    {String(item.part).padStart(2, "0")}
+                  </span>
+                  {published ? (
+                    <a href={`/posts/${item.slug}/`}>{item.title}</a>
+                  ) : (
+                    <span>{item.title}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </aside>
+      )
+    }
+    <article
+      id="article"
+      role="article"
+      class="prose article-prose mx-auto mt-8 max-w-3xl"
+    >
       <Content />
     </article>
 
-    <ul class="my-8">
+    <ul class="my-8 flex flex-wrap gap-x-4 gap-y-1">
       {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
     </ul>
 
@@ -84,14 +147,9 @@ const layoutProps = {
     >
       <button
         id="back-to-top"
-        class="focus-outline whitespace-nowrap py-1 hover:opacity-75"
+        class="nav-text-button focus-outline py-1 whitespace-nowrap"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90">
-          <path
-            d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
-          ></path>
-        </svg>
-        <span>Back to Top</span>
+        top ^
       </button>
 
       <ShareLinks />
@@ -102,11 +160,55 @@ const layoutProps = {
 </Layout>
 
 <style>
+  @reference "../styles/base.css";
+
   main {
     @apply mx-auto w-full max-w-3xl px-4 pb-12;
   }
+  .nav-text-button {
+    @apply text-skin-dim hover:text-skin-accent text-sm transition-colors duration-[120ms];
+  }
   .post-title {
-    @apply text-2xl font-semibold text-skin-accent;
+    @apply text-skin-base text-[1.6rem] font-semibold;
+  }
+  .post-meta {
+    @apply text-skin-dim my-2 text-sm;
+  }
+  .series-rail {
+    @apply border-skin-line bg-skin-card/60 mt-8 border px-4 py-3;
+  }
+  .series-kicker {
+    @apply text-skin-dim m-0 mb-3 text-sm;
+  }
+  .series-list {
+    @apply m-0 grid list-none gap-2 p-0 sm:grid-cols-2;
+  }
+  .series-list li {
+    @apply text-skin-dim flex gap-2 text-sm;
+  }
+  .series-list li.current,
+  .series-list li.current .series-index {
+    @apply text-skin-base;
+  }
+  .series-list a {
+    @apply hover:text-skin-accent transition-colors duration-[120ms];
+  }
+  .series-index {
+    @apply text-skin-sql-keyword shrink-0 tabular-nums;
+  }
+  .article-prose {
+    counter-reset: article-section;
+  }
+  .article-prose > p:first-of-type {
+    @apply text-[1.05rem] leading-[1.8];
+  }
+  .article-prose h2:not(#table-of-contents) {
+    counter-increment: article-section;
+    margin-top: 3rem;
+  }
+  .article-prose h2:not(#table-of-contents)::before {
+    @apply text-skin-sql-keyword mr-3 text-sm font-normal tabular-nums;
+    content: counter(article-section, decimal-leading-zero);
   }
 </style>
 
@@ -123,7 +225,7 @@ const layoutProps = {
 
       let copyButton = document.createElement("button");
       copyButton.className =
-        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
+        "copy-code absolute right-3 -top-3 border border-skin-line bg-skin-card px-2 py-1 font-mono text-[0.7rem] text-skin-dim";
       copyButton.innerHTML = copyButtonLabel;
       codeBlock.setAttribute("tabindex", "0");
       codeBlock.appendChild(copyButton);

@@ -3,146 +3,328 @@ import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
-import LinkButton from "@components/LinkButton.astro";
-import Hr from "@components/Hr.astro";
-import Card from "@components/Card";
-import Socials from "@components/Socials.astro";
+import { SITE, SOCIALS } from "@config";
+import { slugifyStr } from "@utils/slugify";
 import getSortedPosts from "@utils/getSortedPosts";
-import { SOCIALS } from "@config";
+import { PROJECTS } from "../data/projects";
 
 const posts = await getCollection("blog");
-
 const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 
-const socialCount = SOCIALS.filter(social => social.active).length;
+const showFeaturedSection = sortedPosts.length > SITE.postPerPage;
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const listedPosts = (
+  showFeaturedSection
+    ? sortedPosts.filter(({ data }) => !data.featured)
+    : sortedPosts
+).slice(0, 8);
+const activeSocials = SOCIALS.filter(social => social.active);
+
+const formatDate = (date: Date) => new Date(date).toISOString().slice(0, 10);
 ---
 
 <Layout>
   <Header />
   <main id="main-content">
-    <section id="hero">
-      <a
-        target="_blank"
-        href="/rss.xml"
-        class="rss-link"
-        aria-label="rss feed"
-        title="RSS Feed"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
-          ><path
-            d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
-          ></path><path
-            d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
-          ></path><circle cx="6" cy="18" r="2"></circle>
-        </svg>
-        <span class="sr-only">RSS Feed</span>
-      </a>
-
-      <p>
-        I am a Staff software engineer at Education First with a demonstrated history of working in the marketing, advertising and Ecommerce industries. Skilled in React ecosystem (Typescript) and backend tech like Postgres, Mysql.
+    <section class="hero" aria-label="Introduction">
+      <p class="prompt sql-line">
+        <span class="prompt-host">psousa.dev</span><span class="prompt-sigil"
+          >=#</span
+        >
+        <span class="sql-keyword">select</span>
+        <span class="sql-identifier">bio</span>
+        <span class="sql-keyword">from</span>
+        <span class="sql-identifier">author</span><span class="sql-op">;</span
+        ><span class="cursor" aria-hidden="true"></span>
+      </p>
+      <p class="bio">
+        I build the content infrastructure behind large multilingual websites,
+        and tools for data that outgrew its container.
       </p>
       {
-        // only display if at least one social link is enabled
-        socialCount > 0 && (
-          <div class="social-wrapper">
-            <div class="social-links">Social Links:</div>
-            <Socials />
-          </div>
+        activeSocials.length > 0 && (
+          <p class="social-row">
+            <span class="social-prefix">-&gt;</span>
+            {activeSocials.map(social => (
+              <a
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={social.linkTitle}
+                class="social-link"
+              >
+                {social.name.toLowerCase()}
+              </a>
+            ))}
+          </p>
         )
       }
     </section>
 
-    <Hr />
-
     {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured">
-            <h2>Featured</h2>
-            <ul>
-              {featuredPosts.map(({ data, slug }) => (
-                <Card
-                  href={`/posts/${slug}`}
-                  frontmatter={data}
-                  secHeading={false}
-                />
-              ))}
-            </ul>
-          </section>
-          <Hr />
-        </>
+      showFeaturedSection && featuredPosts.length > 0 && (
+        <section class="content-section" aria-label="Featured posts">
+          <p class="label sql-line">
+            <span class="sql-keyword">select</span>
+            <span class="sql-op">*</span>
+            <span class="sql-keyword">from</span>
+            <span class="sql-identifier">posts</span>
+            <span class="sql-keyword">where</span>
+            <span class="sql-identifier">featured</span>
+            <span class="sql-op">=</span>{" "}
+            <>
+              <span class="sql-literal">true</span>
+              <span class="sql-op">;</span>
+            </>
+          </p>
+          <div class="rows">
+            {featuredPosts.map(post => (
+              <article class="row">
+                <span class="date">{formatDate(post.data.pubDatetime)}</span>
+                <div class="row-main">
+                  <p class="title-line">
+                    <a
+                      href={`/posts/${post.id}/`}
+                      class="title-link"
+                      transition:name={slugifyStr(post.data.title)}
+                    >
+                      {post.data.title}
+                    </a>
+                    {post.data.tags.length > 0 && (
+                      <span class="tags"> · {post.data.tags.join(" · ")}</span>
+                    )}
+                  </p>
+                  <p class="desc">{post.data.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       )
     }
 
-    <section id="recent-posts">
-      <h2>Recent Posts</h2>
-      <ul>
+    <section class="content-section" aria-label="All posts">
+      <p class="label sql-line">
+        <span class="sql-keyword">select</span>
+        <span class="sql-op">*</span>
+        <span class="sql-keyword">from</span>
+        <span class="sql-identifier">posts</span>
+        <span class="sql-keyword">order by</span>
+        <span class="sql-identifier">pub_date</span>
+        <span class="sql-keyword">desc</span><span class="sql-op">;</span>
+      </p>
+      <div class="rows">
         {
-          sortedPosts
-            .filter(({ data }) => !data.featured)
-            .map(
-              ({ data, slug }, index) =>
-                index < 4 && (
-                  <Card
-                    href={`/posts/${slug}`}
-                    frontmatter={data}
-                    secHeading={false}
-                  />
-                )
-            )
+          listedPosts.map(post => (
+            <article class="row">
+              <span class="date">{formatDate(post.data.pubDatetime)}</span>
+              <div class="row-main">
+                <p class="title-line">
+                  <a
+                    href={`/posts/${post.id}/`}
+                    class="title-link"
+                    transition:name={slugifyStr(post.data.title)}
+                  >
+                    {post.data.title}
+                  </a>
+                  {post.data.tags.length > 0 && (
+                    <span class="tags"> · {post.data.tags.join(" · ")}</span>
+                  )}
+                </p>
+                <p class="desc">{post.data.description}</p>
+              </div>
+            </article>
+          ))
         }
-      </ul>
-      <div class="all-posts-btn-wrapper">
-        <LinkButton href="/posts">
-          All Posts
-          <svg xmlns="http://www.w3.org/2000/svg"
-            ><path
-              d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z"
-            ></path>
-          </svg>
-        </LinkButton>
+      </div>
+      <p class="more">
+        <a href="/posts">-- more at /posts →</a>
+      </p>
+    </section>
+
+    <section class="content-section" aria-label="Projects">
+      <p class="label sql-line">
+        <span class="sql-keyword">select</span>
+        <span class="sql-op">*</span>
+        <span class="sql-keyword">from</span>
+        <span class="sql-identifier">projects</span><span class="sql-op">;</span
+        >
+      </p>
+      <div class="rows">
+        {
+          PROJECTS.map(project => (
+            <article class="row">
+              <span class="date">{project.meta}</span>
+              <div class="row-main">
+                <p class="title-line">
+                  <a
+                    href={project.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="title-link"
+                  >
+                    {project.name}
+                  </a>
+                </p>
+                <p class="desc">{project.desc}</p>
+              </div>
+            </article>
+          ))
+        }
       </div>
     </section>
   </main>
-
   <Footer />
 </Layout>
 
 <style>
-  /* ===== Hero Section ===== */
-  #hero {
-    @apply pb-6 pt-8;
-  }
-  #hero h1 {
-    @apply my-4 inline-block text-3xl font-bold sm:my-8 sm:text-5xl;
-  }
-  #hero .rss-link {
-    @apply mb-6;
-  }
-  #hero .rss-icon {
-    @apply mb-2 h-6 w-6 scale-110 fill-skin-accent sm:mb-3 sm:scale-125;
-  }
-  #hero p {
-    @apply my-2;
-  }
-  .social-wrapper {
-    @apply mt-4 flex flex-col sm:flex-row sm:items-center;
-  }
-  .social-links {
-    @apply mb-1 mr-2 whitespace-nowrap sm:mb-0;
+  @reference "../styles/base.css";
+
+  main a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 120ms ease;
   }
 
-  /* ===== Featured & Recent Posts Sections ===== */
-  #featured,
-  #recent-posts {
-    @apply pb-6 pt-12;
+  .hero {
+    margin-bottom: 3.25rem;
   }
-  #featured h2,
-  #recent-posts h2 {
-    @apply text-2xl font-semibold tracking-wide;
+  .prompt {
+    @apply text-skin-dim;
+    margin: 0 0 1.25rem;
   }
-  .all-posts-btn-wrapper {
-    @apply my-8 text-center;
+  .sql-line {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.35em;
+    row-gap: 0.15em;
+    align-items: baseline;
+  }
+  .prompt-host {
+    @apply text-skin-sql-identifier;
+  }
+  .prompt-sigil {
+    @apply text-skin-accent;
+    margin-right: 0.5em;
+  }
+  .sql-keyword {
+    @apply text-skin-sql-keyword;
+  }
+  .sql-identifier {
+    @apply text-skin-sql-identifier;
+  }
+  .sql-op,
+  .sql-literal {
+    @apply text-skin-dim;
+  }
+  .cursor {
+    @apply bg-skin-accent;
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 1.2s steps(1, start) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      animation: none;
+    }
+  }
+  .bio {
+    @apply font-sans;
+    font-size: 15.5px;
+    line-height: 1.75;
+    max-width: 38rem;
+    margin: 0 0 1.5rem;
+  }
+  .social-row {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .social-prefix {
+    @apply text-skin-dim;
+  }
+  .social-link:hover {
+    @apply text-skin-accent;
+  }
+
+  .content-section {
+    margin-bottom: 3.25rem;
+  }
+  .label {
+    @apply text-skin-dim;
+    margin: 0 0 1rem;
+  }
+
+  .rows {
+    border-top: 1px solid var(--color-border);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    column-gap: 1.25rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 120ms ease;
+  }
+  .row:hover {
+    background: var(--color-card);
+  }
+  .date {
+    @apply text-skin-dim;
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.15rem;
+  }
+  .row-main {
+    min-width: 0;
+  }
+  .title-line {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .title-link:hover {
+    @apply text-skin-accent;
+  }
+  .tags {
+    @apply text-skin-dim;
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+  .desc {
+    @apply text-skin-dim line-clamp-2 font-sans;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .row {
+      grid-template-columns: 1fr;
+      row-gap: 0.3rem;
+    }
+    .date {
+      font-size: 0.8rem;
+      padding-top: 0;
+    }
+  }
+
+  .more {
+    margin: 1.25rem 0 0;
+  }
+  .more a {
+    @apply text-skin-dim;
+  }
+  .more a:hover {
+    @apply text-skin-accent;
   }
 </style>

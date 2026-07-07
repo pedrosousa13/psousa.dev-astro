@@ -1,6 +1,5 @@
 ---
 import LinkButton from "./LinkButton.astro";
-import socialIcons from "@assets/socialIcons";
 
 const URL = Astro.url;
 
@@ -38,9 +37,9 @@ const shareLinks = [
 ] as const;
 ---
 
-<div class={`social-icons`}>
-  <span class="italic">Share this post on:</span>
-  <div class="text-center">
+<div class="social-icons">
+  <span class="share-label">-- share:</span>
+  <div class="share-list">
     {
       shareLinks.map(social => (
         <LinkButton
@@ -48,8 +47,7 @@ const shareLinks = [
           className="link-button"
           title={social.linkTitle}
         >
-          <Fragment set:html={socialIcons[social.name]} />
-          <span class="sr-only">{social.linkTitle}</span>
+          {social.name.toLowerCase()}
         </LinkButton>
       ))
     }
@@ -57,10 +55,18 @@ const shareLinks = [
 </div>
 
 <style>
+  @reference "../styles/base.css";
+
   .social-icons {
-    @apply flex flex-col flex-wrap items-center justify-center gap-1 sm:items-start;
+    @apply flex flex-col items-center gap-1 sm:flex-row sm:items-baseline sm:gap-2;
+  }
+  .share-label {
+    @apply text-skin-dim text-sm;
+  }
+  .share-list {
+    @apply flex flex-wrap items-center justify-center gap-3 sm:justify-start;
   }
   .link-button {
-    @apply scale-90 p-2 hover:rotate-6 sm:p-1;
+    @apply text-skin-dim hover:text-skin-accent text-sm transition-colors duration-[120ms];
   }
 </style>

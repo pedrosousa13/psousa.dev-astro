@@ -11,15 +11,14 @@ import LinkButton from "@components/LinkButton.astro";
 
   <main id="main-content">
     <div class="not-found-wrapper">
+      <p class="query-line">
+        <span class="dim">psousa.dev=#</span> select * from pages where slug = ?;
+      </p>
       <h1 aria-label="404 Not Found">404</h1>
-      <span aria-hidden="true">¯\_(ツ)_/¯</span>
-      <p>Page Not Found</p>
-      <LinkButton
-        href="/"
-        className="my-6 underline decoration-dashed underline-offset-8 text-lg"
+      <p class="dim">-- 0 rows. nothing here.</p>
+      <LinkButton href="/" className="back-home-link"
+        >-&gt; back home</LinkButton
       >
-        Go back home
-      </LinkButton>
     </div>
   </main>
 
@@ -27,16 +26,24 @@ import LinkButton from "@components/LinkButton.astro";
 </Layout>
 
 <style>
+  @reference "../styles/base.css";
+
   #main-content {
     @apply mx-auto flex max-w-3xl flex-1 items-center justify-center;
   }
   .not-found-wrapper {
-    @apply mb-14 flex flex-col items-center justify-center;
+    @apply mb-14 flex flex-col items-center justify-center gap-3 text-center;
+  }
+  .query-line {
+    @apply text-skin-dim text-sm sm:text-base;
+  }
+  .dim {
+    @apply text-skin-dim;
   }
   .not-found-wrapper h1 {
-    @apply text-9xl font-bold text-skin-accent;
+    @apply text-skin-base my-2 text-7xl font-bold sm:text-8xl;
   }
-  .not-found-wrapper p {
-    @apply mt-4 text-2xl sm:text-3xl;
+  .back-home-link {
+    @apply text-skin-dim hover:text-skin-accent mt-2 text-lg transition-colors duration-[120ms];
   }
 </style>

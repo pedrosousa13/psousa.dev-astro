@@ -8,8 +8,7 @@ featured: true
 draft: false
 tags:
   - docs
-description:
-  'Rollup-compiled CSS modules add a client-side script, raising concerns for server-side rendering. Navigate this quirk for seamless integration in both environments'
+description: "Rollup-compiled CSS modules add a client-side script, raising concerns for server-side rendering. Navigate this quirk for seamless integration in both environments"
 ---
 
 [Skip to solution](#solution)
@@ -63,9 +62,9 @@ in React we then created a component that injects the styles in the head via `gl
 
 ```tsx
 // SSRInjectStyles.tsx
-import React from 'react';
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
+import React from "react";
+import DOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
 
 interface SSRInjectStylesProps {
   id: string;
@@ -73,14 +72,14 @@ interface SSRInjectStylesProps {
 }
 
 const SSRInjectStyles = () => {
-  const SSR_INJECT_ID = '__styleInject_SSR_MODULES';
+  const SSR_INJECT_ID = "__styleInject_SSR_MODULES";
   if (!globalThis?.[SSR_INJECT_ID]) return null;
 
   const styles: [SSRInjectStylesProps] = globalThis[SSR_INJECT_ID];
 
   const uniqueStyles = styles.reduce<Array<SSRInjectStylesProps>>(
     (acc, curr) => {
-      if (!acc.find((style) => style.id === curr.id)) {
+      if (!acc.find(style => style.id === curr.id)) {
         acc.push(curr);
       }
       return acc;
@@ -88,11 +87,11 @@ const SSRInjectStyles = () => {
     []
   );
 
-  const ssrDom = DOMPurify(new JSDOM('<!DOCTYPE html>').window);
+  const ssrDom = DOMPurify(new JSDOM("<!DOCTYPE html>").window);
 
   return (
     <>
-      {uniqueStyles.map((module) => {
+      {uniqueStyles.map(module => {
         return (
           <style
             id={module.id}
@@ -108,7 +107,7 @@ const SSRInjectStyles = () => {
   );
 };
 
-SSRInjectStyles.displayName = 'SSRInjectStyles';
+SSRInjectStyles.displayName = "SSRInjectStyles";
 export { SSRInjectStyles };
 ```
 

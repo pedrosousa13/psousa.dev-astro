@@ -1,95 +1,65 @@
-import { SITE } from "@config";
 import type { CollectionEntry } from "astro:content";
 
 export default (post: CollectionEntry<"blog">) => {
   return (
     <div
       style={{
-        background: "#fefbfb",
+        background: "#20242e",
+        color: "#dde1e8",
         width: "100%",
         height: "100%",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "56px 64px",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          top: "-1px",
-          right: "-1px",
-          border: "4px solid #000",
-          background: "#ecebeb",
-          opacity: "0.9",
-          borderRadius: "4px",
-          display: "flex",
-          justifyContent: "center",
-          margin: "2.5rem",
-          width: "88%",
-          height: "80%",
-        }}
-      />
+      <div style={{ display: "flex", fontSize: 30, color: "#949aa8" }}>
+        -- psousa.dev
+      </div>
 
       <div
         style={{
-          border: "4px solid #000",
-          background: "#fefbfb",
-          borderRadius: "4px",
           display: "flex",
-          justifyContent: "center",
-          margin: "2rem",
-          width: "88%",
-          height: "80%",
+          alignItems: "center",
+          maxHeight: "60%",
+          overflow: "hidden",
         }}
       >
-        <div
+        <p
           style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            margin: "20px",
-            width: "90%",
-            height: "90%",
+            fontSize: 68,
+            fontWeight: "bold",
+            lineHeight: 1.25,
+            margin: 0,
           }}
         >
-          <p
-            style={{
-              fontSize: 72,
-              fontWeight: "bold",
-              maxHeight: "84%",
-              overflow: "hidden",
-            }}
-          >
-            {post.data.title}
-          </p>
-          <div
+          {post.data.title}
+          <span
             style={{
               display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-              marginBottom: "8px",
-              fontSize: 28,
+              width: 30,
+              height: 58,
+              marginLeft: 18,
+              background: "#ff8534",
             }}
-          >
-            <span>
-              by{" "}
-              <span
-                style={{
-                  color: "transparent",
-                }}
-              >
-                "
-              </span>
-              <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-                {post.data.author}
-              </span>
-            </span>
+          />
+        </p>
+      </div>
 
-            <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-              {SITE.title}
-            </span>
-          </div>
-        </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderTop: "2px solid #363c4a",
+          paddingTop: "28px",
+          fontSize: 30,
+          color: "#949aa8",
+        }}
+      >
+        <span>-- {post.data.author}</span>
+        <span>{post.data.pubDatetime.toISOString().slice(0, 10)}</span>
       </div>
     </div>
   );

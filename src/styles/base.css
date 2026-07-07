@@ -1,24 +1,47 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-mono: "Red Hat Mono", ui-monospace, monospace;
+  --font-sans: -apple-system, "Segoe UI", sans-serif;
+}
+
+@theme inline {
+  --color-skin-fill: var(--color-fill);
+  --color-skin-base: var(--color-text-base);
+  --color-skin-dim: var(--color-dim);
+  --color-skin-accent: var(--color-accent);
+  --color-skin-card: var(--color-card);
+  --color-skin-card-muted: var(--color-card-muted);
+  --color-skin-line: var(--color-border);
+  --color-skin-sql-keyword: var(--color-sql-keyword);
+  --color-skin-sql-identifier: var(--color-sql-identifier);
+}
 
 @layer base {
+  /* "console warm" palette: mono chrome, sans prose, unified orange accent */
   :root,
   html[data-theme="light"] {
-    --color-fill: 251, 254, 251;
-    --color-text-base: 40, 39, 40;
-    --color-accent: 0, 108, 172;
-    --color-card: 230, 230, 230;
-    --color-card-muted: 205, 205, 205;
-    --color-border: 236, 233, 233;
+    --color-fill: rgb(250 249 246);
+    --color-text-base: rgb(51 49 54);
+    --color-dim: rgb(125 121 131);
+    --color-accent: rgb(184 74 10);
+    --color-card: rgb(242 239 233);
+    --color-card-muted: rgb(233 229 221);
+    --color-border: rgb(228 224 216);
+    --color-sql-keyword: rgb(138 83 18);
+    --color-sql-identifier: rgb(53 107 93);
   }
   html[data-theme="dark"] {
-    --color-fill: 33, 39, 55;
-    --color-text-base: 234, 237, 243;
-    --color-accent: 255, 107, 1;
-    --color-card: 52, 63, 96;
-    --color-card-muted: 138, 51, 2;
-    --color-border: 171, 75, 8;
+    --color-fill: rgb(32 36 46);
+    --color-text-base: rgb(221 225 232);
+    --color-dim: rgb(148 154 168);
+    --color-accent: rgb(255 133 52);
+    --color-card: rgb(39 44 56);
+    --color-card-muted: rgb(46 52 68);
+    --color-border: rgb(54 60 74);
+    --color-sql-keyword: rgb(224 176 74);
+    --color-sql-identifier: rgb(124 176 164);
   }
   #sun-svg,
   html[data-theme="dark"] #moon-svg {
@@ -29,48 +52,31 @@
     display: block;
   }
   body {
-    @apply flex min-h-[100svh] flex-col bg-skin-fill font-mono text-skin-base 
-    selection:bg-skin-accent selection:bg-opacity-70 selection:text-skin-inverted;
+    @apply bg-skin-fill text-skin-base selection:bg-skin-accent/70 selection:text-skin-fill flex min-h-[100svh] flex-col font-mono;
+  }
+  /* console-warm: everything square, no elevation */
+  * {
+    border-radius: 0;
+    box-shadow: none;
   }
   section,
   footer {
     @apply mx-auto max-w-3xl px-4;
   }
   a {
-    @apply outline-2 outline-offset-1 outline-skin-fill 
-    focus-visible:no-underline focus-visible:outline-dashed;
+    @apply focus-visible:outline-skin-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-dashed;
   }
   svg {
-    @apply inline-block h-6 w-6 fill-skin-base group-hover:fill-skin-accent;
+    @apply fill-skin-base group-hover:fill-skin-accent inline-block h-6 w-6;
   }
   svg.icon-tabler {
-    @apply inline-block h-6 w-6 scale-125 fill-transparent 
-    stroke-current stroke-2 opacity-90 group-hover:fill-transparent 
-    sm:scale-110;
+    @apply inline-block h-6 w-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110;
   }
   .prose {
-    @apply prose-headings:!mb-3 prose-headings:!text-skin-base 
-    prose-h3:italic prose-p:!text-skin-base 
-    prose-a:!text-skin-base prose-a:!decoration-dashed prose-a:underline-offset-8
-    hover:prose-a:text-skin-accent prose-blockquote:!border-l-skin-accent
-    prose-blockquote:border-opacity-50 prose-blockquote:opacity-80
-    prose-figcaption:!text-skin-base prose-figcaption:opacity-70
-    prose-strong:!text-skin-base
-
-    
-    prose-code:rounded prose-code:bg-skin-card 
-    prose-code:bg-opacity-75 prose-code:p-1 
-    prose-code:before:!content-[''] prose-code:after:!content-['']
-    prose-ol:!text-skin-base 
-    prose-ul:overflow-x-clip prose-ul:!text-skin-base prose-li:marker:!text-skin-accent
-    prose-table:text-skin-base prose-th:border
-    prose-th:border-skin-line prose-td:border 
-    prose-td:border-skin-line prose-img:mx-auto 
-    prose-img:!mt-2 prose-img:border-2 
-    prose-img:border-skin-line prose-hr:!border-skin-line;
+    @apply prose-headings:mb-3! prose-headings:text-skin-base! prose-headings:font-mono prose-p:text-skin-base! prose-a:text-skin-base! prose-a:decoration-skin-accent! prose-a:decoration-dashed! prose-a:underline-offset-8 hover:prose-a:text-skin-accent prose-blockquote:border-l-skin-accent! prose-blockquote:bg-skin-card/60 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:font-sans prose-blockquote:not-italic prose-figcaption:text-skin-base! prose-figcaption:opacity-70 prose-strong:text-skin-base! prose-code:bg-skin-card/75 prose-code:p-1 prose-code:font-mono prose-code:before:content-['']! prose-code:after:content-['']! prose-ol:text-skin-base! prose-ul:overflow-x-clip prose-ul:text-skin-base! prose-li:marker:text-skin-accent! prose-table:text-skin-base prose-th:border prose-th:border-skin-line prose-td:border prose-td:border-skin-line prose-img:mx-auto prose-img:mt-2! prose-img:border prose-img:border-skin-line prose-hr:border-skin-line! font-sans;
   }
   .prose a {
-    @apply break-words hover:!text-skin-accent;
+    @apply hover:text-skin-accent! break-words;
   }
   .prose thead th:first-child,
   tbody td:first-child,
@@ -81,13 +87,20 @@
     @apply mb-2;
   }
   .prose details {
-    @apply inline-block cursor-pointer select-none text-skin-base;
+    @apply text-skin-base inline-block cursor-pointer select-none;
   }
   .prose summary {
     @apply focus-outline;
   }
   .prose h2#table-of-contents + p {
     @apply hidden;
+  }
+  .prose :not(pre) > code {
+    @apply text-skin-sql-identifier;
+  }
+  .prose pre,
+  .prose pre code {
+    color: inherit;
   }
 
   /* ===== scrollbar ===== */
@@ -125,11 +138,10 @@
   }
 }
 
-@layer components {
-  .display-none {
-    @apply hidden;
-  }
-  .focus-outline {
-    @apply outline-2 outline-offset-1 outline-skin-fill focus-visible:no-underline focus-visible:outline-dashed;
-  }
+@utility display-none {
+  @apply hidden;
+}
+
+@utility focus-outline {
+  @apply focus-visible:outline-skin-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-dashed;
 }

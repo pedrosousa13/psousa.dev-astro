@@ -13,7 +13,10 @@ const { href, className, ariaLabel, title, disabled = false } = Astro.props;
 {
   disabled ? (
     <span
-      class={`group inline-block ${className}`}
+      class:list={[
+        "group text-skin-dim pointer-events-none inline-block opacity-50 select-none",
+        className,
+      ]}
       aria-label={ariaLabel}
       title={title}
       aria-disabled={disabled}
@@ -23,7 +26,10 @@ const { href, className, ariaLabel, title, disabled = false } = Astro.props;
   ) : (
     <a
       {href}
-      class={`group inline-block hover:text-skin-accent ${className}`}
+      class:list={[
+        "group text-skin-dim hover:text-skin-accent inline-block transition-colors duration-[120ms]",
+        className,
+      ]}
       aria-label={ariaLabel}
       title={title}
     >

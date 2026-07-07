@@ -27,10 +27,11 @@ const { currentPage, totalPages, paginatedPosts, tag, tagName } = Astro.props;
     pageDesc={`All the articles with the tag "${tagName}".`}
   >
     <h1 slot="title" transition:name={tag}>{`Tag:${tag}`}</h1>
-    <ul>
+    <p class="text-skin-dim mb-4">select * from posts where tag = '{tag}';</p>
+    <ul class="border-skin-line border-t">
       {
-        paginatedPosts.map(({ data, slug }) => (
-          <Card href={`/posts/${slug}`} frontmatter={data} />
+        paginatedPosts.map(({ data, id }) => (
+          <Card href={`/posts/${id}`} frontmatter={data} />
         ))
       }
     </ul>

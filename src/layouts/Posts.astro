@@ -20,10 +20,13 @@ const { currentPage, totalPages, paginatedPosts } = Astro.props;
 <Layout title={`Posts | ${SITE.title}`}>
   <Header activeNav="posts" />
   <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
-    <ul>
+    <p class="text-skin-dim mb-4">
+      select * from posts order by pub_date desc;
+    </p>
+    <ul class="border-skin-line border-t">
       {
-        paginatedPosts.map(({ data, slug }) => (
-          <Card href={`/posts/${slug}`} frontmatter={data} />
+        paginatedPosts.map(({ data, id }) => (
+          <Card href={`/posts/${id}`} frontmatter={data} />
         ))
       }
     </ul>

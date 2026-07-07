@@ -2,11 +2,12 @@ import type { Site, SocialObjects } from "./types";
 
 export const SITE: Site = {
   website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
-  author: "Sat Naing",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
+  author: "Pedro Sousa",
+  desc: "I build the content infrastructure behind large multilingual websites, and tools for data that outgrew its container.",
   title: "Pedro Sousa",
   lightAndDarkMode: true,
   postPerPage: 3,
+  scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
 
 export const LOCALE = {
@@ -33,5 +34,5 @@ export const SOCIALS: SocialObjects = [
     href: "https://www.linkedin.com/in/pedrosousa13/",
     linkTitle: `${SITE.title} on LinkedIn`,
     active: true,
-  }
+  },
 ];

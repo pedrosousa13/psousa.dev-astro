@@ -3,9 +3,10 @@ import { LOCALE, SITE } from "@config";
 import "@styles/base.css";
 
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
-const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
-const umamiScriptUrl =
-  import.meta.env.PUBLIC_UMAMI_SCRIPT_URL ?? "https://eu.umami.is/script.js";
+const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
+const plausibleScriptUrl =
+  import.meta.env.PUBLIC_PLAUSIBLE_SCRIPT_URL ??
+  "https://analytics.pedrosousa.me/js/script.js";
 
 export interface Props {
   title?: string;
@@ -159,17 +160,17 @@ const socialImageURL = ogImage
       });
     </script>
     {
-      umamiWebsiteId && (
+      plausibleDomain && (
         <script
           is:inline
-          define:vars={{ umamiScriptUrl, umamiWebsiteId }}
+          define:vars={{ plausibleScriptUrl, plausibleDomain }}
         >
           window.addEventListener("load", () => {
             const loadAnalytics = () => {
               const script = document.createElement("script");
               script.defer = true;
-              script.src = umamiScriptUrl;
-              script.dataset.websiteId = umamiWebsiteId;
+              script.src = plausibleScriptUrl;
+              script.dataset.domain = plausibleDomain;
               document.head.append(script);
             };
 

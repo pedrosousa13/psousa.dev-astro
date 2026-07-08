@@ -15,7 +15,7 @@ export default function Card({ href, frontmatter, secHeading = true }: Props) {
     <a
       href={href}
       style={{ viewTransitionName: slugifyStr(title) }}
-      className="text-skin-base hover:text-skin-accent font-mono text-[1.05rem] font-semibold transition-colors duration-[120ms]"
+      className="text-skin-base hover:text-skin-accent font-mono text-[1rem] font-semibold transition-colors duration-[120ms] sm:text-[1.05rem]"
     >
       {title}
     </a>
@@ -27,19 +27,19 @@ export default function Card({ href, frontmatter, secHeading = true }: Props) {
         {date}
       </span>
       <div className="min-w-0">
-        <p className="mb-1.5 leading-snug">
+        <div className="mb-1.5 leading-snug">
           {secHeading ? (
             <h2 className="inline">{titleLink}</h2>
           ) : (
             <h3 className="inline">{titleLink}</h3>
           )}
           {tags.length > 0 && (
-            <span className="text-skin-dim text-[0.85rem] font-normal">
+            <span className="text-skin-dim text-[0.8rem] font-normal sm:text-[0.85rem]">
               {" "}
               · {tags.join(" · ")}
             </span>
           )}
-        </p>
+        </div>
         <p className="text-skin-dim line-clamp-2 font-sans text-[0.88rem] leading-relaxed">
           {description}
         </p>

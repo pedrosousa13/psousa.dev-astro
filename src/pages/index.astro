@@ -308,13 +308,28 @@ const formatDate = (date: Date) => new Date(date).toISOString().slice(0, 10);
   }
 
   @media (max-width: 640px) {
+    .hero,
+    .content-section {
+      margin-bottom: 3rem;
+    }
     .row {
       grid-template-columns: 1fr;
-      row-gap: 0.3rem;
+      padding: 1rem 0;
+      row-gap: 0.4rem;
     }
     .date {
       font-size: 0.8rem;
       padding-top: 0;
+    }
+    .title-line {
+      margin-bottom: 0.25rem;
+      font-size: 1rem;
+    }
+    .tags {
+      font-size: 0.8rem;
+    }
+    .desc {
+      -webkit-line-clamp: 2;
     }
   }
 

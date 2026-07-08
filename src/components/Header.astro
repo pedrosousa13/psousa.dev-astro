@@ -67,7 +67,7 @@ const { activeNav } = Astro.props;
     @apply bg-skin-accent text-skin-fill absolute -top-full left-16 z-50 px-3 py-2 transition-all focus:top-4;
   }
   .nav-container {
-    @apply mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-6 sm:py-8;
+    @apply relative mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-5 sm:gap-y-3 sm:py-8;
   }
   .brand {
     @apply text-skin-dim hover:text-skin-accent whitespace-nowrap transition-colors duration-[120ms];
@@ -91,5 +91,17 @@ const { activeNav } = Astro.props;
   }
   #theme-btn svg {
     @apply fill-skin-dim hover:fill-skin-accent h-[1.1rem] w-[1.1rem] transition-colors duration-[120ms];
+  }
+
+  @media (max-width: 480px) {
+    nav {
+      @apply w-full gap-x-3 text-[0.95rem];
+    }
+    .sep {
+      @apply hidden;
+    }
+    #theme-btn {
+      @apply absolute top-5 right-4 ml-0;
+    }
   }
 </style>

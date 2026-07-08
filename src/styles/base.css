@@ -29,7 +29,7 @@
     --color-card: rgb(242 239 233);
     --color-card-muted: rgb(233 229 221);
     --color-border: rgb(228 224 216);
-    --color-sql-keyword: rgb(138 83 18);
+    --color-sql-keyword: var(--color-accent);
     --color-sql-identifier: rgb(53 107 93);
   }
   html[data-theme="dark"] {
@@ -40,7 +40,7 @@
     --color-card: rgb(39 44 56);
     --color-card-muted: rgb(46 52 68);
     --color-border: rgb(54 60 74);
-    --color-sql-keyword: rgb(224 176 74);
+    --color-sql-keyword: var(--color-accent);
     --color-sql-identifier: rgb(124 176 164);
   }
   #sun-svg,
@@ -101,6 +101,16 @@
   .prose pre,
   .prose pre code {
     color: inherit;
+  }
+  html[data-theme="dark"] .astro-code {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
+  }
+  html[data-theme="dark"] .astro-code span {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
   }
 
   /* ===== scrollbar ===== */

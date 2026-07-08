@@ -10,6 +10,9 @@ import { remarkReadingTime } from "./src/utils/remarkReadingTime";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  build: {
+    inlineStylesheets: "always",
+  },
   integrations: [react(), sitemap()],
   markdown: {
     remarkPlugins: [

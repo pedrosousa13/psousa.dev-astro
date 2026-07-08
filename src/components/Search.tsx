@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, type ChangeEvent } from "react";
 import Card from "@components/Card";
 import type { CollectionEntry } from "astro:content";
 
@@ -14,19 +14,11 @@ interface Props {
   searchList: SearchItem[];
 }
 
-interface SearchResult {
-  item: SearchItem;
-  refIndex: number;
-}
-
 export default function SearchBar({ searchList }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputVal, setInputVal] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
-    null
-  );
 
-  const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputVal(e.currentTarget.value);
   };
 
@@ -35,10 +27,18 @@ export default function SearchBar({ searchList }: Props) {
       new Fuse(searchList, {
         keys: ["title", "description"],
         includeMatches: true,
-        minMatchCharLength: 2,
+        minMatchCharLength: 1,
         threshold: 0.5,
       }),
     [searchList]
+  );
+
+  const visiblePosts = useMemo(
+    () =>
+      inputVal.length > 0
+        ? fuse.search(inputVal).map(({ item }) => item)
+        : searchList,
+    [fuse, inputVal, searchList]
   );
 
   useEffect(() => {
@@ -56,11 +56,6 @@ export default function SearchBar({ searchList }: Props) {
   }, []);
 
   useEffect(() => {
-    // Add search result only if
-    // input value is more than one character
-    let inputResult = inputVal.length > 1 ? fuse.search(inputVal) : [];
-    setSearchResults(inputResult);
-
     // Update search string in URL
     if (inputVal.length > 0) {
       const searchParams = new URLSearchParams(window.location.search);
@@ -75,13 +70,13 @@ export default function SearchBar({ searchList }: Props) {
 
   return (
     <>
-      <label className="border-skin-line focus-within:border-skin-accent flex items-center gap-2 border-b pb-2 transition-colors duration-[120ms]">
-        <span aria-hidden="true" className="text-skin-dim">
-          where
+      <label className="border-skin-line focus-within:border-skin-accent block border-b pb-2 transition-colors duration-[120ms]">
+        <span className="text-skin-dim mb-2 block text-sm">
+          where title or description contains
         </span>
         <input
-          className="text-skin-base placeholder:text-skin-dim w-full flex-1 bg-transparent focus:outline-none"
-          placeholder="title or description contains…"
+          className="text-skin-base placeholder:text-skin-dim w-full min-w-0 bg-transparent focus:outline-none"
+          placeholder="type query..."
           type="text"
           name="search"
           aria-label="Search articles"
@@ -93,25 +88,21 @@ export default function SearchBar({ searchList }: Props) {
         />
       </label>
 
-      {inputVal.length > 1 && (
+      {inputVal.length > 0 && (
         <p className="text-skin-dim mt-6 font-sans text-sm">
-          Found {searchResults?.length}
-          {searchResults?.length && searchResults?.length === 1
-            ? " result"
-            : " results"}{" "}
-          for '{inputVal}'
+          Found {visiblePosts.length}
+          {visiblePosts.length === 1 ? " result" : " results"} for '{inputVal}'
         </p>
       )}
 
       <ul className="border-skin-line mt-4 border-t">
-        {searchResults &&
-          searchResults.map(({ item, refIndex }) => (
-            <Card
-              href={`/posts/${item.id}`}
-              frontmatter={item.data}
-              key={`${refIndex}-${item.id}`}
-            />
-          ))}
+        {visiblePosts.map(item => (
+          <Card
+            href={`/posts/${item.id}`}
+            frontmatter={item.data}
+            key={item.id}
+          />
+        ))}
       </ul>
     </>
   );

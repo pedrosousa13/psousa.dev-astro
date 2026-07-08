@@ -8,11 +8,7 @@ const { tag, size = "sm" } = Astro.props;
 ---
 
 <li class="my-1 inline-block">
-  <a
-    href={`/tags/${tag}`}
-    transition:name={tag}
-    class={size === "sm" ? "text-sm" : "text-base"}
-  >
+  <a href={`/tags/${tag}`} class={size === "sm" ? "text-sm" : "text-base"}>
     #{tag}
   </a>
 </li>

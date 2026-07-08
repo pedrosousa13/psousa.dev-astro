@@ -2,6 +2,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import Posts from "@layouts/Posts.astro";
 import PostDetails from "@layouts/PostDetails.astro";
+import { SITE } from "@config";
 import getSortedPosts from "@utils/getSortedPosts";
 import getPageNumbers from "@utils/getPageNumbers";
 import getPagination from "@utils/getPagination";
@@ -22,9 +23,11 @@ export async function getStaticPaths() {
     props: { post },
   }));
 
-  const pagePaths = getPageNumbers(posts.length).map(pageNum => ({
-    params: { slug: String(pageNum) },
-  }));
+  const pagePaths = getPageNumbers(posts.length, SITE.postsArchivePerPage).map(
+    pageNum => ({
+      params: { slug: String(pageNum) },
+    })
+  );
 
   return [...postResult, ...pagePaths];
 }
@@ -39,6 +42,7 @@ const sortedPosts = getSortedPosts(posts);
 const pagination = getPagination({
   posts: sortedPosts,
   page: slug,
+  postsPerPage: SITE.postsArchivePerPage,
 });
 ---
 

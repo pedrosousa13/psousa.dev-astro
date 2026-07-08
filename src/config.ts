@@ -8,6 +8,7 @@ export const SITE: Site = {
   ogImage: "psousa-dev-og-image.png",
   lightAndDarkMode: true,
   postPerPage: 3,
+  postsArchivePerPage: 10,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
 

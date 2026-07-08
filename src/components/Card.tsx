@@ -1,4 +1,3 @@
-import { slugifyStr } from "@utils/slugify";
 import type { CollectionEntry } from "astro:content";
 
 export interface Props {
@@ -14,7 +13,6 @@ export default function Card({ href, frontmatter, secHeading = true }: Props) {
   const titleLink = (
     <a
       href={href}
-      style={{ viewTransitionName: slugifyStr(title) }}
       className="text-skin-base hover:text-skin-accent font-mono text-[1rem] font-semibold transition-colors duration-[120ms] sm:text-[1.05rem]"
     >
       {title}

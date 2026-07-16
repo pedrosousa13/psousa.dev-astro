@@ -36,8 +36,6 @@ JSON Bonsai treats the payload as something to navigate, not as a pretty blob of
 
 The tree is virtualized. The page only renders the rows that matter for the current viewport.
 
-![JSON Bonsai tree view](../../assets/images/json-bonsai/tree.png)
-
 That changes the internal model. Instead of recursively mounting the whole object, the app keeps expansion state and derives a visible row list from it.
 
 That row model makes the UI cheaper to update:
@@ -81,6 +79,8 @@ Tree view is the default because JSON is nested. It is not always the best answe
 
 Arrays of objects often read better as tables. Raw view is useful when exact output matters. Formatted view is useful for copy and comparison. Schema view helps when the payload is unfamiliar.
 
+![JSON Bonsai formatted view](../../assets/images/json-bonsai/formatted.png)
+
 Each view has a job:
 
 - Tree: inspect nested structure
@@ -110,5 +110,5 @@ Once that model is clear, the features fit together. Performance gets easier too
 JSON Bonsai is available for Chrome and Firefox:
 
 - [GitHub](https://github.com/pedrosousa13/JSON-Bonsai)
-- [Chrome Web Store](https://chromewebstore.google.com/)
-- [Firefox Add-ons](https://addons.mozilla.org/)
+- [Chrome Web Store](https://chromewebstore.google.com/detail/json-bonsai/dpcomlfdaamelgcgnalkfomdfpmioeml)
+- [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/json-bonsai/)

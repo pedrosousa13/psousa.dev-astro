@@ -1,6 +1,12 @@
 // Personal projects shown on the homepage.
 export const PROJECTS = [
   {
+    name: "ferry",
+    href: "https://github.com/pedrosousa13/ferry",
+    desc: "URL redirector that never watches you. Native declarativeNetRequest redirects, no telemetry.",
+    meta: "typescript · extension",
+  },
+  {
     name: "onda",
     href: "https://github.com/pedrosousa13/onda",
     desc: "Terminal radio for wandering the world's airwaves. Privacy-first, offline search, no telemetry.",

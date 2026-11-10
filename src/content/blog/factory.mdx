@@ -1,0 +1,136 @@
+---
+author: Pedro Sousa
+pubDatetime: 2027-01-04T09:00:00Z
+title: "Factory: running AI-driven development in a loop"
+slug: factory
+featured: true
+draft: false
+tags:
+  - ai
+  - productivity
+  - tools
+description: "Factory is a Claude Code plugin that turns planned GitHub issues into reviewed, merged pull requests, one at a time, and only interrupts me when it has a real question."
+---
+
+import BarChart from "@components/BarChart.astro";
+
+TLDR: [Factory](https://github.com/pedrosousa13/factory) is a Claude Code plugin for building software in a loop. I plan the work with the agent and it becomes issues. Then a long-running session picks the next ready issue, has subagents implement it test-first, reviews it, and merges it when tests, typecheck and review all pass. It interrupts me only for a decision that's mine to make, and if I don't answer, it parks the issue and moves on.
+
+Every project in the [deck.cool series](/posts/deck-cool), and [Vimaminute](/posts/vimaminute), was built this way. Across six repos, that's 1,269 merged pull requests. This post is about the loop that built them.
+
+## Table of contents
+
+## The split: I plan, the loop builds
+
+Factory splits the work into three roles:
+
+1. **Plan** (me, interactive). I talk an idea through with the agent until it's sharp: it grills me with questions, writes a spec, and files tracer-bullet issues labelled `ready-for-agent`. Those steps are Matt Pocock's `/grilling`, `/to-spec` and `/to-tickets` skills, and `/wayfinder` charts anything too big for one session. This is the only place new work is created.
+2. **Run** (the agent, autonomous). `/factory` in a project repo starts a Loop Session that works through those issues one by one.
+3. **Steer** (me, from anywhere). I set priorities and answer questions in the issue tracker, from my phone if I need to.
+
+The loop never invents work. If the queue is empty, it triages any bug reports that came in, runs a short retrospective with `/retro`, and opens a planning session with me.
+
+## One issue, start to finish
+
+```
+pick       next unblocked ready-for-agent issue, highest priority, then oldest
+claim      move it to started, comment the branch name
+implement  TDD subagents write the code; the session only orchestrates
+gate       tests + typecheck + /code-review (standards and spec) all green
+land       PR, auto-merge, issue closed
+boundary   triage new reports · context over ~40%? write a handoff and stop
+```
+
+**The session orchestrates, subagents implement.** The long-running session doesn't write code itself. It dispatches test-driven subagents using Jesse Vincent's [superpowers](https://github.com/obra/superpowers) skills, subagent-driven development and test-driven development, so its own context stays small and focused on the queue. There's one exception, and it's a rule, not a judgment call: a genuine one-liner, like a typo or a single config value, can be done inline.
+
+**Nothing half-done reaches main.** An issue lands only when the tests pass, the typecheck passes, and a code review against the issue's brief has no unresolved findings. If the gate fails and a fix isn't coming, the work stays on its branch and the issue is parked.
+
+**Context is a budget.** At every issue boundary, the session checks how much of its context window it has used. Past about 40%, it writes a handoff document with `/handoff` and stops, and the next `/factory` picks up from the handoff with a clean context.
+
+## Asking without blocking
+
+The interesting design choice is how the loop asks questions.
+
+It could run fully headless, with a shell loop spawning one `claude -p` per issue. I chose a long-lived interactive session instead, because the whole point was "ping me when there's a question", and only an interactive session can wait for an answer with its working context still loaded. A headless run can only shelve the issue and move on, which turns every question into a full shelve-and-resume cycle.
+
+But waiting forever would stall the loop. So a question works like this:
+
+1. **Ping.** A push notification with the question in one line, and a 15-minute timer.
+2. **Answered?** Carry on with full context.
+3. **Not answered?** Park it: commit and push the work to the issue's branch, post the question as a comment on the issue, relabel it `needs-info`, and pick the next issue.
+
+When I answer the comment later, the issue goes back through triage into the queue like any other.
+
+The bar for asking is high. A question is only for a decision I alone can make, a real fork in the brief. Anything the code, the issue or the docs can answer, the agent looks up. And every question comes as a structured multiple-choice prompt with the agent's researched recommendation first, so most answers are one tap.
+
+## Issues an agent can actually pick up
+
+An issue becomes `ready-for-agent` only with an agent brief written into its body, in the format of Matt Pocock's `/triage` skill: the category, current and desired behaviour, the key interfaces described by behaviour rather than file paths, testable acceptance criteria, and what's out of scope. File paths and line numbers are banned from briefs because they'll be stale by the time a session picks the issue up.
+
+Every open issue carries exactly one category (feature, improvement or bug), one state (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human` or `wontfix`) and one milestone.
+
+For projects with an attack surface, meaning anything that takes untrusted input, serves HTTP or stores user data, every milestone also gets a security sweep: a full OWASP Top 10 pass over the code, filed as an issue that runs after the milestone's other work lands. The sweep reports, and it doesn't fix. Its findings become work only after I triage them.
+
+## Stamping a repo
+
+A project is just a repo that carries Factory's conventions. `/factory-new` creates one from scratch: the repo, a private GitHub remote, the issue tracker, labels and agent docs, then straight into a planning session. `/factory-adopt` brings an existing repo in. It stamps the repo without overwriting anything, then walks every open issue through triage in batches of five to ten, which I approve batch by batch.
+
+The tracker is swappable. GitHub Issues is the default, and Linear works too. All the tracker-specific knowledge lives in one adapter document per repo. Some of what's in there was learned the hard way:
+
+- `gh issue list` returns 30 issues by default, with no error, so a longer queue silently loses everything past the cap. The adapter always passes a limit.
+- Label changes take up to a minute to show in filtered listings. Without re-checking each candidate with `gh issue view`, a session could park an issue and immediately pick the same one again, forever.
+
+## Built with Factory
+
+These are the projects that ran through the loop:
+
+| Project                                                                      | Joined Factory                      |
+| ---------------------------------------------------------------------------- | ----------------------------------- |
+| [playdeck](/posts/playdeck)                                                  | 2026-07-28, the day Factory started |
+| framework, later [Pagedeck](/posts/pagedeck)                                 | 2026-08-23, its first day           |
+| slidedeck, later [carouseldeck](/posts/carouseldeck)                         | 2026-10-03, its first day           |
+| [deck.cool](/posts/deck-cool), and [drawerdeck](/posts/drawerdeck) inside it | 2026-10-03, its first day           |
+| [Vimaminute](/posts/vimaminute)                                              | 2026-11-02, its first day           |
+
+<BarChart
+  title="Merged pull requests per project"
+  decimals={0}
+  rows={[
+    { label: "playdeck", value: 479, highlight: true },
+    { label: "framework", value: 356, highlight: true },
+    { label: "deck.cool", value: 166, highlight: true },
+    { label: "pagedeck", value: 142, highlight: true },
+    { label: "slidedeck", value: 77, highlight: true },
+    { label: "Vimaminute", value: 49, highlight: true },
+  ]}
+  caption="1,269 merged pull requests and 1,217 closed issues across the six repos. Pagedeck continued from framework's history."
+/>
+
+Most of those PRs merged themselves on green. My part was the planning sessions, the questions that came in as notifications, and triage.
+
+## Tradeoffs
+
+- **Someone has to start the loop.** It's an interactive session, so the factory is idle when no terminal is open. After a reboot or a handoff, I run `/factory` again.
+- **Planning is the bottleneck, on purpose.** The loop can't do more than what's been planned into good briefs. A vague issue gets parked with a question rather than guessed at.
+- **Review is an agent too.** The gate is tests, typecheck and an agent code review. It catches a lot, but it isn't a person reading every line, and I don't pretend it is.
+- **It depends on other people's skills.** Factory is the control plane. Most of the actual work happens in skills it didn't write, listed below, so you install those too.
+
+## Credits
+
+Factory is mostly glue. The parts that do the thinking come from two skill collections:
+
+- **[mattpocock/skills](https://github.com/mattpocock/skills)** by Matt Pocock: `/grilling` for interviewing me about a plan, `/to-spec` and `/to-tickets` for turning it into issues, `/wayfinder` for charting big efforts, `/triage` and its agent brief format and label vocabulary, `/code-review` for the landing gate, `/tdd`, `/handoff`, `/domain-modeling` for the glossaries and decision records every project keeps, `/pr` for pull request bodies, and `/retro`.
+- **[superpowers](https://github.com/obra/superpowers)** by Jesse Vincent: subagent-driven development and test-driven development, which is how every issue actually gets implemented.
+
+And it all runs in [Claude Code](https://claude.com/claude-code). What Factory adds is the loop around them: the queue, the landing gate, ping and park, the context budget, and the conventions that make a repo loop-ready.
+
+## Try it
+
+Factory installs as a Claude Code plugin from its own marketplace. It also expects the superpowers and engineering skills it builds on, which the README lists:
+
+```sh
+/plugin marketplace add pedrosousa13/factory
+/plugin install factory
+```
+
+Then `/factory-new my-project` to start something new, or `/factory-adopt` inside an existing repo. The [README](https://github.com/pedrosousa13/factory) and `PROTOCOL.md` cover the rest.

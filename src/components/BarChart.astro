@@ -1,0 +1,149 @@
+---
+// A horizontal bar chart in plain HTML and CSS, in the blog's own colours, so
+// it follows the light and dark themes and its text stays readable on a phone.
+// The post's subject is the accent; every other bar is muted, and each bar is
+// named by its label, not its colour. A bar can be split into parts, such as
+// Pagedeck's runtime and React.
+
+export interface Part {
+  value: number;
+  label: string;
+  muted?: boolean;
+}
+
+export interface Row {
+  label: string;
+  value?: number;
+  parts?: Part[];
+  valueLabel?: string;
+  highlight?: boolean;
+}
+
+export interface Props {
+  title: string;
+  caption?: string;
+  rows: Row[];
+  max?: number;
+  unit?: string;
+  decimals?: number;
+}
+
+const { title, caption, rows, unit = "", decimals = 1 } = Astro.props;
+
+const format = (value: number) =>
+  `${value.toLocaleString("en", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })}${unit}`;
+
+const bars = rows.map(row => {
+  const parts = row.parts ?? [{ value: row.value ?? 0, label: row.label }];
+  const total = parts.reduce((sum, part) => sum + part.value, 0);
+  return { row, parts, total };
+});
+const max = Astro.props.max ?? Math.max(...bars.map(bar => bar.total));
+const percent = (value: number) => (max === 0 ? 0 : (value / max) * 100);
+---
+
+<figure class="bar-chart not-prose">
+  <figcaption class="bar-chart__title">{title}</figcaption>
+  <ul class="bar-chart__rows">
+    {bars.map(({ row, parts, total }) => (
+      <li class:list={["bar-chart__row", { "is-highlight": row.highlight }]}>
+        <span class="bar-chart__label">{row.label}</span>
+        <span class="bar-chart__track">
+          {parts.map(part => (
+            <span
+              class:list={["bar-chart__bar", { "is-muted": part.muted }]}
+              style={`width: ${percent(part.value)}%`}
+              title={`${part.label}: ${format(part.value)}`}
+            />
+          ))}
+          <span class="bar-chart__value">
+            {row.valueLabel ?? format(total)}
+          </span>
+        </span>
+      </li>
+    ))}
+  </ul>
+  {caption && <p class="bar-chart__caption">{caption}</p>}
+</figure>
+
+<style>
+  .bar-chart {
+    --bar-muted: rgb(125 121 131 / 0.55);
+    margin: 2rem 0;
+  }
+  :global(html[data-theme="dark"]) .bar-chart {
+    --bar-muted: rgb(111 118 134);
+  }
+  .bar-chart__title {
+    margin-bottom: 0.75rem;
+    color: var(--color-text-base);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .bar-chart__rows {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .bar-chart__row {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-dim);
+    font-size: 0.85rem;
+  }
+  .bar-chart__label {
+    text-align: right;
+  }
+  .is-highlight {
+    color: var(--color-text-base);
+    font-weight: 600;
+  }
+  .bar-chart__track {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    /* Leaves room for the value after the longest bar. */
+    padding-right: 5rem;
+    border-left: 1px solid var(--color-border);
+  }
+  .bar-chart__bar {
+    flex-shrink: 0;
+    height: 18px;
+    background-color: var(--bar-muted);
+  }
+  .bar-chart__bar:last-of-type {
+    border-radius: 0 4px 4px 0;
+  }
+  .is-highlight .bar-chart__bar {
+    background-color: var(--color-accent);
+  }
+  .is-highlight .bar-chart__bar.is-muted {
+    background-color: var(--bar-muted);
+  }
+  .bar-chart__value {
+    flex-shrink: 0;
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+  .bar-chart__caption {
+    margin-top: 0.75rem;
+    color: var(--color-dim);
+    font-size: 0.85rem;
+  }
+  @media (max-width: 520px) {
+    .bar-chart__row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .bar-chart__label {
+      text-align: left;
+    }
+  }
+</style>

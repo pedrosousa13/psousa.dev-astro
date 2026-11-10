@@ -10,6 +10,7 @@ import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
 import { getCollection } from "astro:content";
 import postFilter from "@utils/postFilter";
+import { SERIES } from "../data/series";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -31,43 +32,24 @@ const {
 
 const { Content } = await render(post);
 
-const contentStoreSeries = [
-  {
-    part: 1,
-    slug: "content-store-part-1",
-    title: "Stop fetching what you already have",
-  },
-  {
-    part: 2,
-    slug: "content-store-part-2",
-    title: "Keeping a copy you can trust",
-  },
-  {
-    part: 3,
-    slug: "content-store-part-3",
-    title: "The read side",
-  },
-  {
-    part: 4,
-    slug: "content-store-part-4",
-    title: "The fun stuff",
-  },
-];
-
 const publishedPostSlugs = new Set(
   (await getCollection("blog", postFilter)).map(post => post.id)
 );
-const currentSeriesPart = contentStoreSeries.find(
-  item => item.slug === post.id
+const series = SERIES.find(item =>
+  item.posts.some(seriesPost => seriesPost.slug === post.id)
 );
+const seriesPosts = (series?.posts ?? []).map((seriesPost, index) => ({
+  ...seriesPost,
+  part: index + 1,
+}));
+const currentSeriesPart = seriesPosts.find(item => item.slug === post.id);
 const nextSeriesPart =
   currentSeriesPart &&
-  contentStoreSeries.find(
+  seriesPosts.find(
     item =>
       item.part === currentSeriesPart.part + 1 &&
       publishedPostSlugs.has(item.slug)
   );
-const isContentStorePost = Boolean(currentSeriesPart);
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
@@ -101,39 +83,35 @@ const layoutProps = {
   <main id="main-content">
     <h1 class="post-title">{title}</h1>
     <p class="post-meta">
-      -- <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} /> · {
-        readingTime
-      }
+      -- <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} /> ·{" "}
+      {readingTime}
     </p>
-    {
-      isContentStorePost && currentSeriesPart && (
-        <aside class="series-rail" aria-label="The content store series">
-          <p class="series-kicker">
-            The content store · part {currentSeriesPart.part} of{" "}
-            {contentStoreSeries.length}
-          </p>
-          <ol class="series-list">
-            {contentStoreSeries.map(item => {
-              const published = publishedPostSlugs.has(item.slug);
-              const isCurrent = item.slug === post.id;
+    {series && currentSeriesPart && (
+      <aside class="series-rail" aria-label={`${series.name} series`}>
+        <p class="series-kicker">
+          {series.name} · part {currentSeriesPart.part} of {seriesPosts.length}
+        </p>
+        <ol class="series-list">
+          {seriesPosts.map(item => {
+            const published = publishedPostSlugs.has(item.slug);
+            const isCurrent = item.slug === post.id;
 
-              return (
-                <li class={isCurrent ? "current" : ""}>
-                  <span class="series-index">
-                    {String(item.part).padStart(2, "0")}
-                  </span>
-                  {published ? (
-                    <a href={`/posts/${item.slug}/`}>{item.title}</a>
-                  ) : (
-                    <span>{item.title}</span>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </aside>
-      )
-    }
+            return (
+              <li class={isCurrent ? "current" : ""}>
+                <span class="series-index">
+                  {String(item.part).padStart(2, "0")}
+                </span>
+                {published ? (
+                  <a href={`/posts/${item.slug}/`}>{item.title}</a>
+                ) : (
+                  <span>{item.title}</span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </aside>
+    )}
     <article
       id="article"
       role="article"
@@ -141,28 +119,26 @@ const layoutProps = {
     >
       <Content />
     </article>
-    {
-      nextSeriesPart && (
-        <nav
-          class="series-next"
-          aria-label="Next article in The content store series"
-        >
-          <span>Next in series</span>
-          <a href={`/posts/${nextSeriesPart.slug}/`}>
-            {String(nextSeriesPart.part).padStart(2, "0")} ·{" "}
-            {nextSeriesPart.title}
-          </a>
-        </nav>
-      )
-    }
+    {nextSeriesPart && (
+      <nav
+        class="series-next"
+        aria-label={`Next article in ${series?.name} series`}
+      >
+        <span>Next in series</span>
+        <a href={`/posts/${nextSeriesPart.slug}/`}>
+          {String(nextSeriesPart.part).padStart(2, "0")} ·{" "}
+          {nextSeriesPart.title}
+        </a>
+      </nav>
+    )}
 
     <ul class="my-8 flex flex-wrap gap-x-4 gap-y-1">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
+      {tags.map(tag => (
+        <Tag tag={slugifyStr(tag)} />
+      ))}
     </ul>
 
-    <div
-      class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"
-    >
+    <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4">
       <button
         id="back-to-top"
         class="nav-text-button focus-outline py-1 whitespace-nowrap"

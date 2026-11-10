@@ -97,7 +97,12 @@
   .prose thead th:first-child,
   tbody td:first-child,
   tfoot td:first-child {
-    padding-left: 0.5714286em;
+    padding-inline-start: 0.5714286em !important;
+  }
+  .prose thead th:last-child,
+  tbody td:last-child,
+  tfoot td:last-child {
+    padding-inline-end: 0.5714286em !important;
   }
   .prose h2#table-of-contents {
     @apply mb-2;

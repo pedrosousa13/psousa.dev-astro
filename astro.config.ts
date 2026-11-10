@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import sitemap from "@astrojs/sitemap";
@@ -13,7 +14,7 @@ export default defineConfig({
   build: {
     inlineStylesheets: "always",
   },
-  integrations: [react(), sitemap()],
+  integrations: [react(), mdx(), sitemap()],
   markdown: {
     remarkPlugins: [
       remarkToc,

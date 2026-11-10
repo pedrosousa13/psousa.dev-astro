@@ -1,0 +1,43 @@
+name: Publish scheduled posts
+
+# A post with a future pubDatetime stays hidden until the site is rebuilt after
+# that time. Each morning, rebuild on Vercel if a post became due in the last
+# day. Set the VERCEL_DEPLOY_HOOK secret (a deploy hook for main, from the
+# Vercel project's Settings > Git > Deploy Hooks) to turn this on; without it
+# the run only reports which posts are due.
+
+on:
+  schedule:
+    - cron: "5 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Find posts due since yesterday
+        id: due
+        run: |
+          posts="$(node scripts/due-posts.mjs)"
+          echo "$posts"
+          if [ -n "$posts" ]; then echo "due=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Rebuild the site
+        if: steps.due.outputs.due == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "::notice::No VERCEL_DEPLOY_HOOK secret, so nothing was rebuilt. Trigger the deploy hook by hand."
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST "$VERCEL_DEPLOY_HOOK"

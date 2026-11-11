@@ -1,6 +1,6 @@
 ---
 author: Pedro Sousa
-pubDatetime: 2026-12-07T09:00:00Z
+pubDatetime: 2026-11-30T09:00:00Z
 title: "Learning vim one small React edit at a time"
 slug: vimaminute
 featured: false

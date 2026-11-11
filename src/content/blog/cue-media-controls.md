@@ -1,6 +1,6 @@
 ---
 author: Pedro Sousa
-pubDatetime: 2026-11-23T09:00:00Z
+pubDatetime: 2026-11-16T09:00:00Z
 title: "Media controls for every tab, without polling"
 slug: cue-media-controls
 featured: false
